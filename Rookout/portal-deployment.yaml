@@ -22,6 +22,8 @@ spec:
     spec:
       containers:
       - env:
+        - name: JAVA_TOOL_OPTIONS
+          value: "-javaagent:/appdynamics/rook.jar"
         - name: APPDYNAMICS_AGENT_ACCOUNT_ACCESS_KEY
           valueFrom:
             secretKeyRef:
@@ -50,7 +52,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: status.hostIP
-        image: appddemo/adcapital-tomcat:latest
+        image: kevinbappd/adcapital-tomcat:latest
         envFrom:
           - configMapRef:
               name: env-map
@@ -82,11 +84,17 @@ spec:
       - name: project
       - name: appdynamics
       initContainers:
-        - image: appddemo/adcapital-project
+        - image: kevinbappd/adcapital-project
           name: provider
           volumeMounts:
           - mountPath: /project
             name: project
+        - name: fetch-rookout
+          image: odise/busybox-curl
+          command: ["curl","-L","http://repository.sonatype.org/service/local/artifact/maven/redirect?r=central-proxy&g=com.rookout&a=rook&v=LATEST","-o","/appdynamics/rook.jar"]
+          volumeMounts:
+          - mountPath: /appdynamics
+            name: appdynamics
 status: {}
 
 ---
