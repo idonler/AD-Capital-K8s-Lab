@@ -22,8 +22,6 @@ spec:
     spec:
       containers:
       - env:
-        - name: JAVA_TOOL_OPTIONS
-          value: "-javaagent:/appdynamics/rook.jar"
         - name: APPDYNAMICS_AGENT_ACCOUNT_ACCESS_KEY
           valueFrom:
             secretKeyRef:
@@ -37,9 +35,7 @@ spec:
         - name: ROLE
           value: portal
         - name: APPDYNAMICS_AGENT_NODE_NAME
-          valueFrom:
-            fieldRef:
-              fieldPath: metadata.name
+          value: Portal
         - name: APPDYNAMICS_AGENT_TIER_NAME
           value: Portal-Service
         - name: APPD_ANALYTICS_MONITOR
@@ -52,7 +48,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: status.hostIP
-        image: kevinbappd/adcapital-tomcat:latest
+        image: appddemo/adcapital-tomcat:latest
         envFrom:
           - configMapRef:
               name: env-map
@@ -84,17 +80,11 @@ spec:
       - name: project
       - name: appdynamics
       initContainers:
-        - image: kevinbappd/adcapital-project
+        - image: appddemo/adcapital-project
           name: provider
           volumeMounts:
           - mountPath: /project
             name: project
-        - name: fetch-rookout
-          image: odise/busybox-curl
-          command: ["curl","-L","http://repository.sonatype.org/service/local/artifact/maven/redirect?r=central-proxy&g=com.rookout&a=rook&v=LATEST","-o","/appdynamics/rook.jar"]
-          volumeMounts:
-          - mountPath: /appdynamics
-            name: appdynamics
 status: {}
 
 ---
